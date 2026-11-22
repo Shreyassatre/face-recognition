@@ -1,0 +1,29 @@
+# Deployment repository: track only the Python backend (including app/static),
+# ONNX model files, and the minimum files needed to install/run it.
+*
+
+!.gitignore
+!.env.example
+!README.md
+!requirements.txt
+!app/
+!app/**
+!models/
+!models/*.onnx
+
+# Never commit local runtime state or Python bytecode.
+.env
+app/__pycache__/
+app/**/*.py[cod]
+data/
+
+# Explicitly exclude development-only client/source projects and tools.
+frontend/
+angular-client/
+examples/
+scripts/
+sdk/
+.venv/
+node_modules/
+dist/
+
