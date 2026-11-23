@@ -14,9 +14,14 @@ class Settings(BaseSettings):
     neon_database_url: str | None = None
     model_dir: str = "models"
     hosted_origin: str = "http://localhost:5173"
+    allowed_return_origins: str = ""
     session_ttl_seconds: int = 300
-    match_threshold: float = 0.78
-    match_margin: float = 0.04
+    match_threshold: float = 0.42
+    match_margin: float = 0.05
+
+    @property
+    def allowed_return_origin_set(self) -> set[str]:
+        return {origin.strip().rstrip("/") for origin in self.allowed_return_origins.split(",") if origin.strip()}
 
     @property
     def database_url(self) -> str:

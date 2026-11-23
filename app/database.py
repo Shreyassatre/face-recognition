@@ -25,8 +25,15 @@ def get_db():
 
 
 def migrate_local_schema() -> None:
-    """Small, data-preserving SQLite migration for the first MVP schema change."""
+    """Idempotent schema migrations for both PostgreSQL (Neon) and local SQLite."""
     if not is_sqlite:
+        with engine.begin() as connection:
+            connection.exec_driver_sql("ALTER TABLE employees ADD COLUMN IF NOT EXISTS location VARCHAR(200)")
+            connection.exec_driver_sql("ALTER TABLE employees DROP CONSTRAINT IF EXISTS employees_tenant_id_external_id_key")
+            connection.exec_driver_sql(
+                "CREATE UNIQUE INDEX IF NOT EXISTS uq_employees_tenant_org_external "
+                "ON employees (tenant_id, organization_id, external_id)"
+            )
         return
     with engine.begin() as connection:
         def add_column(table: str, column: str, definition: str) -> None:
@@ -35,6 +42,7 @@ def migrate_local_schema() -> None:
                 connection.exec_driver_sql(f"ALTER TABLE {table} ADD COLUMN {column} {definition}")
 
         add_column("employees", "organization_id", "INTEGER")
+        add_column("employees", "location", "VARCHAR(200)")
         add_column("verification_sessions", "organization_id", "INTEGER")
         add_column("attendance_events", "organization_id", "INTEGER")
         tenant_columns = connection.exec_driver_sql("PRAGMA table_info(tenants)").mappings().all()

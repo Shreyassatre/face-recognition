@@ -24,12 +24,13 @@ class Organization(Base):
 
 class Employee(Base):
     __tablename__ = "employees"
-    __table_args__ = (UniqueConstraint("tenant_id", "external_id"),)
+    __table_args__ = (UniqueConstraint("tenant_id", "organization_id", "external_id", name="uq_employees_tenant_org_external"),)
     id: Mapped[int] = mapped_column(primary_key=True)
     tenant_id: Mapped[int] = mapped_column(ForeignKey("tenants.id"), index=True)
     organization_id: Mapped[int | None] = mapped_column(ForeignKey("organizations.id"), index=True, nullable=True)
     external_id: Mapped[str] = mapped_column(String(128), index=True)
     display_name: Mapped[str] = mapped_column(String(200))
+    location: Mapped[str | None] = mapped_column(String(200), nullable=True)
     embedding: Mapped[bytes | None] = mapped_column(LargeBinary, nullable=True)
     enrolled_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
